@@ -18,7 +18,7 @@ class Trainer extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'full_name', 'email', 'password', 'user_type', 'photo_url', 'height', 'weight', 'age', 'description', 'main_sport', 'city', 'phone_number'
+        'full_name', 'email', 'password', 'user_type', 'photo_url', 'facebook', 'instagram', 'height', 'weight', 'age', 'description', 'main_sport', 'city', 'phone_number'
     ];
 
     /**

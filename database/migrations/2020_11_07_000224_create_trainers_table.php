@@ -18,15 +18,17 @@ class CreateTrainersTable extends Migration
             $table->string('full_name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('user_type')->default('trainer');
+            $table->string('user_type')->nullable()->default('trainer');
             $table->string('photo_url')->nullable();
-            $table->string('height')->default('180');
-            $table->string('weight')->default('80');
-            $table->integer('age')->default('25');
-            $table->string('description')->default('The pain that you feel today is going to serve as your strength tomorrow.');
-            $table->string('main_sport')->nullable();
-            $table->string('city')->default('France, Paris');
-            $table->string('phone_number')->default('+123456789');
+            $table->string('facebook')->nullable()->default('https://facebook.com');
+            $table->string('instagram')->nullable()->default('https://instagram.com');
+            $table->string('height')->nullable()->default('180');
+            $table->string('weight')->nullable()->default('80');
+            $table->integer('age')->nullable()->default('25');
+            $table->string('description')->nullable()->default('The pain that you feel today is going to serve as your strength tomorrow.');
+            $table->string('main_sport')->nullable()->default('Bodybuilding');
+            $table->string('city')->nullable()->default('France, Paris');
+            $table->string('phone_number')->nullable()->default('+123456789');
 
             $table->timestamps();
         });

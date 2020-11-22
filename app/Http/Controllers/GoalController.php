@@ -8,15 +8,14 @@ use App\Models\Goal;
 
 class GoalController extends Controller
 {
-    public function index(Request $request){
+    public function show(Request $request, $id){
         
-        $goal = Goal::where('client_id',$request->id)->get();
-
-        return response()->json($goal[0]);
+        $goal = Goal::where('client_id', $id)->first();
+        return response()->json($goal);
     }
 
-    public function update(Request $request){
-        $goal = Goal::where('client_id',$request->id)->first();
+    public function update(Request $request, $id){
+        $goal = Goal::where('client_id',$id)->first();
 
         $goal->current_weight = $request->currentWeight;
         $goal->final_weight = $request->goalWeight;

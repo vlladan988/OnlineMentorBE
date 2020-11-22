@@ -19,6 +19,7 @@ class CreateGalleriesTable extends Migration
             $table->string('front_image');
             $table->string('back_image');
             $table->string('side_image');
+            $table->string('weight');
             $table->timestamps();
         });
     }

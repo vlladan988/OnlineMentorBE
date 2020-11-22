@@ -9,7 +9,7 @@ class Gallery extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['client_id', 'front_image', 'back_image', 'side_image'];
+    protected $fillable = ['client_id', 'front_image', 'back_image', 'side_image', 'weight'];
 
     public function client(){
     	return $this->belongsTo('App\Models\Client');

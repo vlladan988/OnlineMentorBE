@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
-use App\Models\Admin; 
 use App\Models\GuestClient; 
 use App\Models\Trainer; 
 use App\Models\Client; 
@@ -30,9 +29,9 @@ class AuthController extends Controller
     { 
         $validator = Validator::make($request->all(), [ 
             'full_name' => 'required', 
-            'email' => 'required|email', 
+            'email' => 'required|unique:trainers|unique:clients|email', 
             'password' => 'required', 
-            'c_password' => 'required|same:password', 
+            'confirm_password' => 'required|same:password', 
         ]);
         if ($validator->fails()) { 
                 return response()->json(['error'=>$validator->errors()], 422);            
@@ -98,17 +97,8 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-
     $userType = $request->userType;
 
-    // if($userType == 0){ // Client
-    //     return response()->json(auth('api-client')->user());
-    // } else if ($userType == 1){ // Trainer
-    //     return response()->json(auth('api-trainer')->user());
-    // } else {
-    //     return response()->json(auth('api-guests-clients')->user());
-    // }
-    
     $trainer = Trainer::find(2);
     return response()->json($trainer->clients);
     }

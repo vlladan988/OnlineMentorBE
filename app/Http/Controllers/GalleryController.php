@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Gallery;
+use App\Models\Client;
+use \stdClass;
 
 
 
@@ -38,7 +40,6 @@ class GalleryController extends Controller
      */
     public function store(Request $request)
     {
-        // return 12333;
         $images = $request->photos; 
         $imageDbName = [];
         foreach($images as $imageItem) {
@@ -50,14 +51,15 @@ class GalleryController extends Controller
         }
 
         $client = auth('api-client')->user();
-        $gallery = Gallery::create([
+        Gallery::create([
             'client_id' => $client->id,
             'front_image' => $imageDbName[0],
             'back_image' => $imageDbName[1],
             'side_image' => $imageDbName[2],
+            'weight' => $client->weight,
         ]);
 
-        return response()->json($gallery);
+        return $this->responseWithImageData($client);
     }
 
     /**
@@ -66,9 +68,34 @@ class GalleryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        //
+        $client = Client::find($id);
+        return $this->responseWithImageData($client);
+    }
+
+    public function responseWithImageData($client){
+        $galleryListImage = [];
+        $galleries = $client->galleries;
+
+        foreach($galleries as $gallery){
+            $arrayOfPhotos = [
+                storage_path('app/public/Gallery/' . $gallery->front_image),
+                storage_path('app/public/Gallery/' . $gallery->back_image), 
+                storage_path('app/public/Gallery/' . $gallery->side_image)
+            ];
+
+            $galleryObj = new stdClass();
+            $galleryObj->id = $gallery->id;
+            $galleryObj->date = $gallery->created_at;
+            $galleryObj->city = $client->city;
+            $galleryObj->weight = $gallery->weight;
+            $galleryObj->name = $client->full_name;
+            $galleryObj->photos = $arrayOfPhotos;
+            array_push($galleryListImage,$galleryObj);
+        }
+
+        return response()->json($galleryListImage);
     }
 
     /**
@@ -100,8 +127,15 @@ class GalleryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        //
+        $gallery = Gallery::find($id);
+        $client = Client::find($gallery->client_id);
+        unlink(storage_path('app/public/Gallery/' . $gallery->front_image));
+        unlink(storage_path('app/public/Gallery/' . $gallery->back_image));
+        unlink(storage_path('app/public/Gallery/' . $gallery->side_image));
+        $gallery->delete();
+
+        return $this->responseWithImageData($client);
     }
 }

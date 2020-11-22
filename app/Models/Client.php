@@ -40,7 +40,7 @@ class Client extends Authenticatable implements JWTSubject
     ];
 
     public function goals(){
-    	return $this->hasMany('App\Models\Goal', 'client_id');
+    	return $this->hasOne('App\Models\Goal', 'client_id');
     }
 
     public function trainer(){

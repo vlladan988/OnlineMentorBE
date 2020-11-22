@@ -21,13 +21,8 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-        // $userType = $request->userType;
         $trainer = auth('api-trainer')->user();
-        // if($userType === 'admin'){
-        //     return response()->json($trainer->guestClients);
-        // } else if($userType === 'trainer'){
-        //     return response()->json($trainer->clients);
-        // }
+
         return response()->json($trainer->clients);
     }
 
@@ -49,7 +44,31 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [ 
+            'full_name' => 'required', 
+            'email' => 'required|unique:trainers|unique:clients|email', 
+            'password' => 'required', 
+            'confirm_password' => 'required|same:password', 
+        ]);
+        if ($validator->fails()) { 
+                return response()->json(['error'=>$validator->errors()], 422);            
+            }
+
+        $trainer = auth('api-trainer')->user();
+        $input = $request->all(); 
+        $input['password'] = bcrypt($input['password']); 
+        $input['trainer_id'] = $trainer->id; 
+        if($trainer->user_type === 'admin'){
+            $input['user_type'] = 'guest'; 
+        }
+
+        $client = Client::create($input);
+
+        Goal::create([
+            'client_id' => $client->id
+        ]);
+
+        return response()->json($trainer->clients);
     }
 
     /**
@@ -58,9 +77,10 @@ class ClientController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        //
+        $client = Client::find($id);
+        return response()->json($client);
     }
 
     /**
@@ -81,9 +101,9 @@ class ClientController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
-        $client = Client::find($request->id);
+        $client = Client::find($id);
 
         $client->age = $request->age;
         $client->weight = $request->weight;
@@ -104,37 +124,20 @@ class ClientController extends Controller
      */
     public function destroy($id)
     {
-        //
-    }
-
-    public function measurementsCreate(Request $request)
-    {
-        return 123;
-    }
-
-    public function storeGallery(Request $request)
-    {
+        $client = Client::find($id);
+        $galleries = Gallery::where('client_id', $id)->get();
         
-
-        $images = $request->photos; 
-        $imageDbName = [];
-        foreach($images as $imageItem) {
-            $image = str_replace('data:image/png;base64,', '', $imageItem);
-            $image = str_replace(' ', '+', $image);
-            $imageName = str_random(15).'.'.'png';
-            array_push($imageDbName, $imageName);
-            Storage::disk('local')->put("public/Gallery/" . $imageName, base64_decode($imageItem));
+        foreach($galleries as $gallery){
+            unlink(storage_path('app/public/Gallery/' . $gallery->front_image));
+            unlink(storage_path('app/public/Gallery/' . $gallery->back_image));
+            unlink(storage_path('app/public/Gallery/' . $gallery->side_image));
         }
+        
+        $galleries = Gallery::where('client_id', $id)->delete();
+        $goal = Goal::where('client_id', $id)->delete();
+        $client->delete();
 
-        $client = auth('api-client')->user();
-        $gallery = Gallery::create([
-            'client_id' => $client->id,
-            'front_image' => $imageDbName[0],
-            'back_image' => $imageDbName[1],
-            'side_image' => $imageDbName[2],
-        ]);
-
-        return response()->json($gallery);
-
+        return response(['success'=> 'Success'], 200);
     }
+
 }
