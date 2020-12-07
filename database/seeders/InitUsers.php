@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\GuestClient; 
 use App\Models\Trainer; 
 use App\Models\Client; 
+use App\Models\RecipeType; 
 
 class InitUsers extends Seeder
 {
@@ -16,6 +17,9 @@ class InitUsers extends Seeder
      */
     public function run()
     {
+        $recipeTypes =['Keto', 'Paleo', 'Vegan', 'Detox'];
+
+
         Trainer::create([
             'full_name' => 'Vladan Admin', 
             'email' => 'vlladan988@gmail.com', 
@@ -43,6 +47,12 @@ class InitUsers extends Seeder
             'email' => 'stevanka988@gmail.com', 
             'password' => bcrypt('password'),
         ]);
+
+        foreach($recipeTypes as $type){
+            RecipeType::create([
+                'name' => $type
+            ]);
+        }
 
         // Client::create([
         //     'full_name' => 'Marko Nikolic', 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Trainer; 
+use App\Models\Client; 
 
 
 class TrainerController extends Controller
@@ -47,7 +48,9 @@ class TrainerController extends Controller
      */
     public function show($id)
     {
-        //
+        $client = Client::find($id);
+        
+        return response()->json($client->trainer);
     }
 
     /**
