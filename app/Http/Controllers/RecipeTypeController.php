@@ -15,9 +15,15 @@ class RecipeTypeController extends Controller
      */
     public function index()
     {
-        $recipes = Trainer::find(1)->recipeTypes;
+        $user = auth('api-trainer')->user();
 
-        return response()->json($recipes);
+        $trainerRecipeTypes = [];
+        $recipes = Trainer::find(1)->recipeTypes->toArray();
+        if($user->id != 1)
+            $trainerRecipeTypes = Trainer::find($user->id)->recipeTypes->toArray();
+        $response = array_merge($recipes, $trainerRecipeTypes);
+
+        return response()->json($response);
     }
 
     /**

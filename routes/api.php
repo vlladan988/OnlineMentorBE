@@ -40,8 +40,10 @@ Route::get('/galleries/{id}', 'App\Http\Controllers\GalleryController@show');
 Route::post('/galleries', 'App\Http\Controllers\GalleryController@store');
 Route::delete('/galleries/{id}', 'App\Http\Controllers\GalleryController@destroy');
 
-Route::get('/trainerRecipies', 'App\Http\Controllers\TrainerRecipeController@index');
-Route::post('/trainerRecipies', 'App\Http\Controllers\TrainerRecipeController@store');
+Route::get('/recipes', 'App\Http\Controllers\RecipeController@index');
+Route::post('/recipes', 'App\Http\Controllers\RecipeController@store');
+Route::put('/recipes/{id}', 'App\Http\Controllers\RecipeController@update');
+Route::delete('/recipes/{id}', 'App\Http\Controllers\RecipeController@destroy');
 
 Route::get('/recipeTypes', 'App\Http\Controllers\RecipeTypeController@index');
 

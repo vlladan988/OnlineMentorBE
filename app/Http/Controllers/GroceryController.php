@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grocery;
+use App\Models\RecipeGrocery;
 use Illuminate\Http\Request;
 
 class GroceryController extends Controller
@@ -49,7 +50,9 @@ class GroceryController extends Controller
             'carbons' => $request->carbons,
             'fats' => $request->fats,
             'calories' => $request->calories,
-            'description' => $request->description
+            'default_proteins' => $request->proteins,
+            'default_carbons' => $request->carbons,
+            'default_fats' => $request->fats,
         ]);
 
         return $this->index();
@@ -89,6 +92,43 @@ class GroceryController extends Controller
         $trainer = auth('api-trainer')->user();
         $grocery = Grocery::where('trainer_id', $trainer->id)->where('id', $id)->first();
 
+        $allRecipeGrocery = RecipeGrocery::where('name', $grocery->name)->get();
+
+        foreach($allRecipeGrocery as $recipeGrocery){
+            if($recipeGrocery){
+
+                if ($trainer->id == $recipeGrocery->recipe->trainer->id){
+
+                    $isCupByGlassPinchOrHandful = $request->unit == 'Glass' || $request->unit == 'Pinch' || $request->unit == 'Handful';
+                    $newProteinValues = $isCupByGlassPinchOrHandful ? $recipeGrocery->unit_type * $request->proteins : ($recipeGrocery->unit_type * $request->proteins) / 100;
+                    $newCarbonValues = $isCupByGlassPinchOrHandful ? $recipeGrocery->unit_type * $request->carbons : ($recipeGrocery->unit_type * $request->carbons) / 100;
+                    $newFatValues = $isCupByGlassPinchOrHandful ? $recipeGrocery->unit_type * $request->fats : ($recipeGrocery->unit_type * $request->fats) / 100;
+
+                    $recipeGrocery->name = $request->name;
+                    if($recipeGrocery->unit != $request->unit){
+                        $recipeGrocery->unit = $request->unit;
+                        $recipeGrocery->unit_type = $request->unitType;
+                        $recipeGrocery->proteins = $request->proteins;
+                        $recipeGrocery->carbons = $request->carbons;
+                        $recipeGrocery->fats = $request->fats;
+                        $recipeGrocery->calories = $request->calories;
+                        $recipeGrocery->default_proteins = $request->proteins;
+                        $recipeGrocery->default_carbons = $request->carbons;
+                        $recipeGrocery->default_fats = $request->fats;
+                    } else {
+                        $recipeGrocery->proteins = $newProteinValues;
+                        $recipeGrocery->carbons = $newCarbonValues;
+                        $recipeGrocery->fats = $newFatValues;
+                        $recipeGrocery->calories = $newProteinValues * 4 + $newCarbonValues * 4 + $newFatValues * 9;
+                        $recipeGrocery->default_proteins = $request->proteins;
+                        $recipeGrocery->default_carbons = $request->carbons;
+                        $recipeGrocery->default_fats = $request->fats;
+                    }
+                    $recipeGrocery->save();
+                }
+            }
+        }
+
         $grocery->name = $request->name;
         $grocery->unit = $request->unit;
         $grocery->unit_type = $request->unitType;
@@ -96,7 +136,9 @@ class GroceryController extends Controller
         $grocery->carbons = $request->carbons;
         $grocery->fats = $request->fats;
         $grocery->calories = $request->calories;
-        $grocery->description = $request->description;
+        $grocery->default_proteins = $request->proteins;
+        $grocery->default_carbons = $request->carbons;
+        $grocery->default_fats = $request->fats;
         $grocery->save();
 
         return $this->index();
@@ -110,7 +152,16 @@ class GroceryController extends Controller
      */
     public function destroy($id)
     {
-        $grocery = Grocery::find($id);
+        $trainer = auth('api-trainer')->user();
+        $grocery = Grocery::where('trainer_id', $trainer->id)->where('id', $id)->first();
+        $allRecipeGrocery = RecipeGrocery::where('name', $grocery->name)->get();
+
+        foreach($allRecipeGrocery as $recipeGrocery){
+            if($recipeGrocery)
+                if ($trainer->id == $recipeGrocery->recipe->trainer->id)
+                    $recipeGrocery->delete();
+        }        
+
         $grocery->delete();
 
         return $this->index();
