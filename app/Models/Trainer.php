@@ -55,6 +55,10 @@ class Trainer extends Authenticatable implements JWTSubject
         return $this->hasMany('App\Models\Grocery', 'trainer_id');
     }
 
+    public function templates(){
+        return $this->hasMany('App\Models\Template', 'trainer_id');
+    }
+
     // Rest omitted for brevity
 
     /**

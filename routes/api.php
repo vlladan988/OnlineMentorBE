@@ -23,7 +23,6 @@ Route::post('/register', 'App\Http\Controllers\AuthController@register');
 Route::post('/resetPassword', 'App\Http\Controllers\AuthController@resetPassword');
 Route::post('/me', 'App\Http\Controllers\AuthController@me')->middleware('checkToken');
 
-
 Route::get('/clients', 'App\Http\Controllers\ClientController@index');
 Route::get('/clients/{id}', 'App\Http\Controllers\ClientController@show');
 Route::post('/clients', 'App\Http\Controllers\ClientController@store');
@@ -51,6 +50,28 @@ Route::get('/grocery', 'App\Http\Controllers\GroceryController@index');
 Route::post('/grocery', 'App\Http\Controllers\GroceryController@store');
 Route::put('/grocery/{id}', 'App\Http\Controllers\GroceryController@update');
 Route::delete('/grocery/{id}', 'App\Http\Controllers\GroceryController@destroy');
+
+Route::get('/templates', 'App\Http\Controllers\TemplateController@index');
+Route::post('/templates', 'App\Http\Controllers\TemplateController@store');
+Route::put('/templates/{id}', 'App\Http\Controllers\TemplateController@update');
+Route::delete('/templates/{id}', 'App\Http\Controllers\TemplateController@destroy');
+Route::post('/templates/assignTo', 'App\Http\Controllers\TemplateController@assignToClient');
+
+Route::post('/templateMeals', 'App\Http\Controllers\TemplateMealController@store');
+Route::get('/templateMeals/{id}', 'App\Http\Controllers\TemplateMealController@show');
+Route::post('/templateMealsOrder', 'App\Http\Controllers\TemplateMealController@editMealOrder');
+Route::put('/templateMeals/{id}', 'App\Http\Controllers\TemplateMealController@update');
+Route::delete('/templateMeals/{id}', 'App\Http\Controllers\TemplateMealController@destroy');
+
+Route::post('/templateMealRecipes', 'App\Http\Controllers\TemplateMealRecipeController@store');
+Route::get('/templateMealRecipes/{id}', 'App\Http\Controllers\TemplateMealRecipeController@show');
+Route::delete('/templateMealRecipes/{recipeId}/{mealId}', 'App\Http\Controllers\TemplateMealRecipeController@destroy');
+
+Route::get('/dailyMeals', 'App\Http\Controllers\DailyMealController@index');
+Route::post('/dailyMeals', 'App\Http\Controllers\DailyMealController@store');
+
+
+
 
 
 

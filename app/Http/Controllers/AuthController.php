@@ -42,12 +42,24 @@ class AuthController extends Controller
 
         $userType = $request->userType;
 
-        if($userType == 0){ // Client
-            $user = Client::create($input);
-        } else if($userType == 1) { // Trainer
+        // if($userType == 0){ // Client
+        //     $user = Client::create($input);       ///// Bez tokena moze da se registruje samo GuestClient i Trainer, client se registruje iz SliderLeft komponente. 
+        // } else if($userType == 1) { // Trainer
+        //     $user = Trainer::create($input);
+        // } else {
+        //     $user = Client::create([ // GuestClient
+        //         'full_name' => $input['full_name'], 
+        //         'email' => $input['email'], 
+        //         'password' => $input['password'],
+        //         'user_type' => 'guest',
+        //         'trainer_id' => 1, 
+        //     ]);
+        // }
+
+        if($userType == 1){ // Trainer
             $user = Trainer::create($input);
-        } else {
-            $user = Client::create([ // GuestClient
+        } else if($userType == 2) { // GuestClient
+            $user = Client::create([
                 'full_name' => $input['full_name'], 
                 'email' => $input['email'], 
                 'password' => $input['password'],
@@ -56,7 +68,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if($userType != 1){ //Client or GuestClient create default goal
+        if($userType != 1){ //GuestClient create default goal
             Goal::create([
                 'client_id' => $user->id
             ]);

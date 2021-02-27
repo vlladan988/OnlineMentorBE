@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Template;
 
 class Client extends Authenticatable implements JWTSubject
 {
@@ -49,6 +50,14 @@ class Client extends Authenticatable implements JWTSubject
 
     public function galleries(){
     	return $this->hasMany('App\Models\Gallery', 'client_id');
+    }
+
+    public function templates(){
+        return $this->belongsToMany(Template::class, 'client_template', 'client_id', 'template_id');
+    }
+
+    public function dailyMeals(){
+    	return $this->hasMany('App\Models\DailyMeal', 'client_id');
     }
 
     // Rest omitted for brevity

@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\GuestClient; 
 use App\Models\Trainer; 
 use App\Models\Client; 
-use App\Models\RecipeType; 
+use App\Models\RecipeType;
+use App\Models\Recipe;
 
 class InitUsers extends Seeder
 {
@@ -53,6 +54,12 @@ class InitUsers extends Seeder
                 'name' => $type
             ]);
         }
+
+        // Recipe::create([
+        //     'trainer_id' => 1,
+        //     'name' => 'Piletina',
+        //     'recipe_description' => 'Opis',
+        // ]);
 
         // Client::create([
         //     'full_name' => 'Marko Nikolic', 

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TemplateMeal;
+
 
 class Recipe extends Model
 {
@@ -17,6 +19,10 @@ class Recipe extends Model
 
     public function recipeGroceries(){
         return $this->hasMany('App\Models\RecipeGrocery', 'recipe_id');
+    }
+
+    public function templateMeals() {
+        return $this->belongsToMany(TemplateMeal::class, 'templatemeal_recipe','recipe_id', 'meal_id');
     }
 
 
