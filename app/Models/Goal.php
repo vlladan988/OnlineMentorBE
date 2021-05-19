@@ -9,7 +9,7 @@ class Goal extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['start_at', 'end_at', 'current_weight', 'final_weight', 'description', 'client_id'];
+    protected $fillable = ['start_at', 'end_at', 'final_weight', 'description', 'client_id'];
 
     public function client(){
     	return $this->belongsTo('App\Models\Client');

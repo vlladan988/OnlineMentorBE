@@ -170,9 +170,13 @@ class AuthController extends Controller
         if($userType == 0 || $userType == 2){ // Client or GuestClient
             $user = auth('api-client')->user();
             $guard = 'api-client';
+            if($user->photo_url != null)
+                $user['photo_url'] = storage_path('app/public/ClientProfileImage/' . $user->photo_url);
         } else { // Trainer
             $user = auth('api-trainer')->user();
             $guard = 'api-trainer';
+            if($user->photo_url != null)
+                $user['photo_url'] = storage_path('app/public/TrainerProfileImage/' . $user->photo_url);
         }
 
         return response()->json([

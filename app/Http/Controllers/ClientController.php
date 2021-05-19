@@ -11,6 +11,7 @@ use App\Models\Trainer;
 use App\Models\Client; 
 use App\Models\Goal;
 use App\Models\Gallery;
+use DB;
 
 class ClientController extends Controller
 {
@@ -22,6 +23,11 @@ class ClientController extends Controller
     public function index(Request $request)
     {
         $trainer = auth('api-trainer')->user();
+
+        foreach($trainer->clients as $client){
+            if($client->photo_url != null)
+                $client['photo_url'] = storage_path('app/public/ClientProfileImage/' . $client->photo_url);
+        }
 
         return response()->json($trainer->clients);
     }
@@ -68,6 +74,11 @@ class ClientController extends Controller
             'client_id' => $client->id
         ]);
 
+        foreach($trainer->clients as $client){
+            if($client->photo_url != null)
+                $client['photo_url'] = storage_path('app/public/ClientProfileImage/' . $client->photo_url);
+        }
+
         return response()->json($trainer->clients);
     }
 
@@ -80,6 +91,8 @@ class ClientController extends Controller
     public function show(Request $request, $id)
     {
         $client = Client::find($id);
+        if($client->photo_url != null)
+            $client['photo_url'] = storage_path('app/public/ClientProfileImage/' . $client->photo_url);
         return response()->json($client);
     }
 
@@ -106,12 +119,27 @@ class ClientController extends Controller
         $client = Client::find($id);
 
         $client->age = $request->age;
+        if($request->profileImage != null){
+            if($client->photo_url != null){
+                unlink(storage_path("app/public/ClientProfileImage/" . $client->photo_url));
+            }
+            $imageUrl = $request->profileImage;
+            $image = str_replace('data:image/png;base64,', '', $imageUrl);
+            $image = str_replace(' ', '+', $image);
+            $imageName = str_random(15).'.'.'png';
+            Storage::disk('local')->put("public/ClientProfileImage/" . $imageName, base64_decode($imageUrl));
+            $client->photo_url = $imageName;
+        }
+
         $client->weight = $request->weight;
         $client->height = $request->height;
         $client->description = $request->desc;
         $client->city = $request->city;
         $client->phone_number = $request->phoneNumber;
         $client->save();
+
+        if($client->photo_url != null)
+            $client['photo_url'] = storage_path('app/public/ClientProfileImage/' . $client->photo_url);
 
         return response()->json($client);
     }
@@ -134,7 +162,8 @@ class ClientController extends Controller
         }
         
         $galleries = Gallery::where('client_id', $id)->delete();
-        $goal = Goal::where('client_id', $id)->delete();
+        Goal::where('client_id', $id)->delete();
+        DB::table('client_template')->where(['client_id' => $id])->delete();
         $client->delete();
 
         return response(['success'=> 'Success'], 200);

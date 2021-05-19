@@ -17,7 +17,6 @@ class GoalController extends Controller
     public function update(Request $request, $id){
         $goal = Goal::where('client_id',$id)->first();
 
-        $goal->current_weight = $request->currentWeight;
         $goal->final_weight = $request->goalWeight;
         $goal->description = $request->description;
         $goal->start_at = Carbon::parse($request->currentTime);

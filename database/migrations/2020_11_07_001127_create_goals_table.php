@@ -18,7 +18,6 @@ class CreateGoalsTable extends Migration
             $table->id();
             $table->date('start_at')->default(Carbon::now());
             $table->date('end_at')->default(Carbon::now());
-            $table->string('current_weight')->default('100');
             $table->string('final_weight')->default('80');
             $table->string('description')->default('Cut weight, gain muscle, better performanse...');
             $table->integer('client_id');

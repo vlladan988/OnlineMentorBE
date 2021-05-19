@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use App\Models\Trainer;
 use App\Models\RecipeGrocery;
 use App\Models\RecipeType;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -209,11 +210,17 @@ class RecipeController extends Controller
             unlink(storage_path('app/public/RecipeImage/' . $recipeToDelete['recipe_image_url']));
 
         $recipeGroceries = $recipeToDelete->recipeGroceries;
+        $dailyRecipeGroceries = $recipeToDelete->dailyRecipeGroceries;
 
-         foreach($recipeGroceries as $recipe){
-            $recipe->delete();
+         foreach($recipeGroceries as $grocery){
+            $grocery->delete();
          }
-         
+         foreach($dailyRecipeGroceries as $dailyGrocery){
+            $dailyGrocery->delete();
+         }
+
+         DB::table('dailymeals_recipes')->where('recipe_id', $recipeToDelete->id)->delete();
+         DB::table('templatemeal_recipe')->where('recipe_id', $recipeToDelete->id)->delete();
          $recipeToDelete->delete();
 
         return $this->index();

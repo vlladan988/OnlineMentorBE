@@ -6,6 +6,8 @@ use App\Models\DailyMeal;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Client;
+use App\Models\DailyRecipeGrocery;
+use DB;
 
 class DailyMealController extends Controller
 {
@@ -24,9 +26,36 @@ class DailyMealController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function recipeCreate(Request $request)
     {
-        //
+        $clientId = $request->clientId;
+        $date = Carbon::parse($request->date);
+        $dailyMealId = $request->dailyMealId;
+
+        DB::table('dailymeals_recipes')->insert([
+            'dailymeal_id' => $dailyMealId,
+            'recipe_id' => $request->recipeId
+        ]);
+
+        foreach($request->dailyRecipeGroceries as $grocery){
+            DailyRecipeGrocery::create([
+                'recipe_id' => $request->recipeId,
+                'name' => $grocery['name'],
+                'unit' => $grocery['unit'],
+                'unit_type' => $grocery['unit_type'],
+                'proteins' => $grocery['proteins'],
+                'carbons' => $grocery['carbons'],
+                'fats' => $grocery['fats'],
+                'calories' => $grocery['calories'],
+                'default_proteins' => $grocery['default_proteins'],
+                'default_carbons' => $grocery['default_carbons'],
+                'default_fats' => $grocery['default_fats'],
+                'daily_meal' => $dailyMealId,
+            ]);
+        }
+
+        return $this->show($clientId, Carbon::parse($date));
+
     }
 
     /**
@@ -37,14 +66,12 @@ class DailyMealController extends Controller
      */
     public function store(Request $request)
     {
-        // $client = Client::find($request->clientId);
-        $dailyMeal = DailyMeal::create([
+        DailyMeal::create([
             'client_id' => $request->clientId,
             'name' => $request->name,
             'date' => Carbon::parse($request->date)
         ]);
 
-        // return response()->json($dailyMeal);
         return $this->show($request->clientId, Carbon::parse($request->date));
     }
 
@@ -56,9 +83,18 @@ class DailyMealController extends Controller
      */
     public function show($clientId, $date)
     {
-        $dailyMails = DailyMeal::where('client_id', $clientId)->where('date', Carbon::parse($date))->get();
+        $dailyMeals = DailyMeal::where('client_id', $clientId)->where('date', Carbon::parse($date))->get();
 
-        return response()->json($dailyMails);
+        foreach($dailyMeals as $meal){
+            $meal->dailyMealRecipes;
+            foreach($meal->dailyMealRecipes as $recipe){
+                if($recipe->recipe_image_url != '0' && $recipe->recipe_image_url != '1' && $recipe->recipe_image_url != '2')
+                $recipe->recipe_image_url = storage_path('app/public/RecipeImage/' . $recipe->recipe_image_url);
+                $recipe['daily_recipe_groceries'] = DailyRecipeGrocery::where('daily_meal', $meal->id)->where('recipe_id', $recipe->id)->get();
+            }
+        }
+
+        return response()->json($dailyMeals);
     }
 
     /**
@@ -79,9 +115,27 @@ class DailyMealController extends Controller
      * @param  \App\Models\DailyMeal  $dailyMeal
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, DailyMeal $dailyMeal)
+    public function update(Request $request, $id)
     {
-        //
+        $recipe = DailyRecipeGrocery::where('daily_meal', $request->dailyMealId)->where('recipe_id', $id)->delete();
+
+
+        foreach($request->dailyRecipeGroceries as $grocery){
+            DailyRecipeGrocery::create([
+                'recipe_id' => $id,
+                'name' => $grocery['name'],
+                'unit' => $grocery['unit'],
+                'unit_type' => $grocery['unit_type'],
+                'proteins' => $grocery['proteins'],
+                'carbons' => $grocery['carbons'],
+                'fats' => $grocery['fats'],
+                'calories' => $grocery['calories'],
+                'daily_meal' => $request->dailyMealId,
+            ]);
+        }
+
+
+        return $this->show($request->clientId, Carbon::parse($request->date));
     }
 
     /**
@@ -90,9 +144,31 @@ class DailyMealController extends Controller
      * @param  \App\Models\DailyMeal  $dailyMeal
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request, $id)
     {
-        // $dailyMeal = DailyMeal::find($request->mealId)->delete();
-        
+        DailyRecipeGrocery::where('daily_meal', $id)->delete();
+        DB::table('dailymeals_recipes')->where('dailymeal_id', $id)->delete();
+        DailyMeal::find($id)->delete();
+
+        return $this->show($request->clientId, Carbon::parse($request->date));
+    }
+
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function recipeDestroy(Request $request, $id)
+    {
+        $mealId = $request->dailyMealId;
+        $clientId = $request->clientId;
+        $date = $request->date;
+
+        DailyRecipeGrocery::where('daily_meal', $mealId)->where('recipe_id', $id)->delete();
+        DB::table('dailymeals_recipes')->where('dailymeal_id', $mealId)->where('recipe_id', $id)->delete();
+
+        return $this->show($clientId, Carbon::parse($date));
     }
 }

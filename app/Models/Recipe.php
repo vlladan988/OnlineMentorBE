@@ -25,5 +25,13 @@ class Recipe extends Model
         return $this->belongsToMany(TemplateMeal::class, 'templatemeal_recipe','recipe_id', 'meal_id');
     }
 
+    public function dailyMeals() {
+        return $this->belongsToMany(DailyMeal::class, 'dailymeals_recipes', 'recipe_id', 'dailymeal_id');
+    }
+
+    public function dailyRecipeGroceries(){
+        return $this->hasMany('App\Models\DailyRecipeGrocery', 'recipe_id');
+    }
+
 
 }

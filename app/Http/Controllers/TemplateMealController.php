@@ -40,7 +40,7 @@ class TemplateMealController extends Controller
     {
         $templateId = $request->templateId;
         $template = Template::find($templateId);
-        $trainer = auth('api-trainer')->user();
+        // $trainer = auth('api-trainer')->user();
 
         TemplateMeal::create([
             'template_id' => $templateId,
@@ -128,6 +128,5 @@ class TemplateMealController extends Controller
         $templateMeal->delete();
 
         return $this->show($templateMeal->template->id);
-
     }
 }

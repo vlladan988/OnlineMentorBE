@@ -49,6 +49,8 @@ class TrainerController extends Controller
     public function show($id)
     {
         $client = Client::find($id);
+        if($client->trainer->photo_url != null)
+            $client->trainer['photo_url'] = storage_path('app/public/TrainerProfileImage/' . $client->trainer->photo_url);
         
         return response()->json($client->trainer);
     }
@@ -74,6 +76,7 @@ class TrainerController extends Controller
     public function update(Request $request, $id)
     {
         $trainer = Trainer::find($id);
+
         $trainer->age = $request->age;
         $trainer->height = $request->height;
         $trainer->weight = $request->weight;
@@ -94,10 +97,11 @@ class TrainerController extends Controller
             $imageName = str_random(15).'.'.'png';
             Storage::disk('local')->put("public/TrainerProfileImage/" . $imageName, base64_decode($imageUrl));
             $trainer->photo_url = $imageName;
-            $trainer['photo_url'] = storage_path('app/public/TrainerProfileImage/' . $trainer->photo_url);
         }
-
+        
         $trainer->save();
+        if($trainer->photo_url != null)
+            $trainer['photo_url'] = storage_path('app/public/TrainerProfileImage/' . $trainer->photo_url);
         return response()->json($trainer);
     }
 

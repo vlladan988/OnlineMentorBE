@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Validator;
 use App\Models\Grocery;
 use App\Models\RecipeGrocery;
 use Illuminate\Http\Request;

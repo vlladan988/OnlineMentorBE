@@ -21,16 +21,16 @@ class TemplateController extends Controller
     public function index()
     {
         $user = auth('api-trainer')->user();
-        $responseData = [];
+        // $responseData = [];
 
         foreach($user->templates as $template){
             if($template->template_image_url)
                 $template->template_image_url = storage_path('app/public/TemplateImage/' . $template->template_image_url);
-            array_push($responseData, $template);
+            // array_push($responseData, $template);
         }
         
 
-        return response()->json($responseData);
+        return response()->json($user->templates);
     }
 
     /**
@@ -84,7 +84,21 @@ class TemplateController extends Controller
      */
     public function show($id)
     {
-        //
+        $clientTemplates = Client::find($id)->templates;
+        foreach($clientTemplates as $template){
+            $template->templateMeals;
+            if($template->template_image_url)
+                $template->template_image_url = storage_path('app/public/TemplateImage/' . $template->template_image_url);
+
+            foreach($template->templateMeals as $meal){
+                $meal->recipes;
+                foreach($meal->recipes as $recipe){
+                    $recipe->recipeGroceries;
+                }
+            }
+        }
+
+        return response()->json($clientTemplates);
     }
 
     /**
@@ -147,7 +161,12 @@ class TemplateController extends Controller
             unlink(storage_path('app/public/TemplateImage/' . $template['template_image_url']));
         }
 
-        // $template->templateMeals->delete();
+        foreach($template->templateMeals as $meal){
+            DB::table('templatemeal_recipe')->where('meal_id', $meal->id)->delete();
+            $meal->delete();
+        }
+        
+        DB::table('client_template')->where(['template_id' => $template->id])->delete();
         $template->delete();
 
         return $this->index();
@@ -160,8 +179,25 @@ class TemplateController extends Controller
         $template = Template::find($templateId);
         $client = Client::find($clientId);
 
+        $isTemplateAssigned = DB::table('client_template')->where('client_id', $clientId)->get();
+
+        if(count($isTemplateAssigned)) 
+            return response()->json(['error'=> 'Template already assigned to client'], 500);   
+
+
         DB::table('client_template')->insert(['template_id' => $templateId, 'client_id' => $clientId]);
 
         return response()->json(['template' => $template->name, 'client' => $client->full_name]);
+
+
+    }
+
+    public function unassignFromClient(Request $request){
+        
+        $clientId = $request->clientId;
+
+        DB::table('client_template')->where('client_id', $clientId)->delete();
+
+        return response()->json(['ok'=> 'Template unassigned'], 200);
     }
 }

@@ -14,4 +14,8 @@ class DailyMeal extends Model
     public function client(){
        return $this->belongsTo('App\Models\Client');
     }
+
+    public function dailyMealRecipes() {
+        return $this->belongsToMany(Recipe::class, 'dailymeals_recipes', 'dailymeal_id', 'recipe_id');
+    }
 }
