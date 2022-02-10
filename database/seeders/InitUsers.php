@@ -22,7 +22,7 @@ class InitUsers extends Seeder
 
 
         Trainer::create([
-            'full_name' => 'Vladan Admin', 
+            'full_name' => 'Vladan Stevanovic', 
             'email' => 'vlladan988@gmail.com', 
             'password' => bcrypt('password'),
             'user_type' => 'admin'
